@@ -24,14 +24,15 @@
             android:id="@+id/btn_show_place"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:background="@color/colorTransparent"
+            android:background="@color/colorWhite"
             android:contentDescription="@string/ic_place_description"
             android:src="@drawable/ic_place" />
 
         <ImageButton
+            android:id="@+id/btn_show_detail"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:background="@color/colorTransparent"
+            android:background="@color/colorWhite"
             android:contentDescription="@string/ic_details_description"
             android:src="@drawable/ic_details" />
 
