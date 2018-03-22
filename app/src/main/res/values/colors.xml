@@ -9,4 +9,7 @@
 
     <color name="colorGrey900">#212121</color>
     <color name="colorGrey800">#424242</color>
+    <color name="colorGreenA700">#00C853</color>
+    <color name="colorRedA700">#D50000</color>
+    <color name="colorTransparent">#80000000</color>
 </resources>
