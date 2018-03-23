@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">GeoProject</string>
+    <string name="button_add_address">Add address</string>
+    <string name="toolbar_empty_list">Empty list</string>
+    <string name="tv_address_name">Address Name</string>
+    <string name="ic_place_description">It shows the location of the address</string>
+    <string name="ic_details_description">It shows a dialog with the details of the address</string>
+    <string name="dialog_address_detail_title">Address Detail</string>
+    <string name="dialod_address_detail_example">Avenida Rafael Sanzio 150, Camichines Vallarta, 45020 Zapopan, Jal.</string>
+    <string name="dialog_address_detail_latitude">Lat. 20.678664</string>
+    <string name="dialog_address_detail_longitude">Lng. -103.429873</string>
+    <string name="button_close">Close</string>
 </resources>
