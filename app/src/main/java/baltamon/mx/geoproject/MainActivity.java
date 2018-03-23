@@ -12,12 +12,18 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+
 public class MainActivity extends AppCompatActivity {
+
+    private Realm mRealm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setupRealm();
 
         setupToolbar();
         setupRecyclerView();
@@ -47,6 +53,13 @@ public class MainActivity extends AppCompatActivity {
             mActionBar.setTitle("Geo Project");
     }
 
+    private void setupRealm(){
+        Realm.init(this);
+        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder()
+                .name("geoprojectdb.realm").build();
+        mRealm = Realm.getInstance(realmConfiguration);
+    }
+
     public void setupRecyclerView() {
         ArrayList<String> arrayList = new ArrayList<>();
         for (int i = 1; i <= 10; i++)
@@ -58,5 +71,11 @@ public class MainActivity extends AppCompatActivity {
         AddressesRecyclerAdapter mAdapter = new AddressesRecyclerAdapter(arrayList);
         mRecyclerView.setAdapter(mAdapter);
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        mRealm.close();
+        super.onDestroy();
     }
 }
