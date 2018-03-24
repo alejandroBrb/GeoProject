@@ -1,4 +1,7 @@
 <resources>
+    
+    <string name="GOOGLE_MAPS_API_KEY">AIzaSyAJVyaHz6lx_WRtX0YPiruZT0LLRsBTHlE</string>
+    
     <string name="app_name">GeoProject</string>
     <string name="button_add_address">Add address</string>
     <string name="toolbar_empty_list">Empty list</string>
