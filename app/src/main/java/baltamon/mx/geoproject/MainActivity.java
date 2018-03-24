@@ -31,6 +31,9 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 
+import io.realm.Realm;
+import io.realm.RealmConfiguration;
+
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
@@ -43,10 +46,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private static final int LOCATION_PERMISSION = 100;
 
+    private Realm mRealm;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setupRealm();
 
         setupToolbar();
         setupConnection();
@@ -92,6 +98,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ActionBar mActionBar = getSupportActionBar();
         if (mActionBar != null)
             mActionBar.setTitle("Geo Project");
+    }
+
+
+    private void setupRealm(){
+        Realm.init(this);
+        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder()
+                .name("geoprojectdb.realm").build();
+        mRealm = Realm.getInstance(realmConfiguration);
     }
 
     private void setupConnection() {
@@ -191,5 +205,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void showToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        mRealm.close();
+        super.onDestroy();
     }
 }
