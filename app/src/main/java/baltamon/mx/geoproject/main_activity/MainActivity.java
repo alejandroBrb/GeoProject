@@ -1,4 +1,4 @@
-package baltamon.mx.geoproject;
+package baltamon.mx.geoproject.main_activity;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -16,6 +16,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -31,11 +32,18 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 
-import io.realm.Realm;
-import io.realm.RealmConfiguration;
+import baltamon.mx.geoproject.adapters.AddressesRecyclerAdapter;
+import baltamon.mx.geoproject.R;
+import baltamon.mx.geoproject.models.AddressModel;
+import io.realm.RealmResults;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
-        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
+        MainActivityView {
+
+    private MainActivityPresenter mPresenter;
+
+    private AddressesRecyclerAdapter mAdapter;
 
     private GoogleMap mGoogleMap;
     private GoogleApiClient mGoogleApiClient;
@@ -46,17 +54,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private static final int LOCATION_PERMISSION = 100;
 
-    private Realm mRealm;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setupRealm();
+        mPresenter = new MainActivityPresenter(this);
+        mPresenter.onCreate();
 
         setupToolbar();
         setupConnection();
-        setupRecyclerView();
     }
 
     @Override
@@ -86,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.tb_empty_list:
-                Toast.makeText(this, "Empty list", Toast.LENGTH_SHORT).show();
+                mPresenter.cleanAddressesList();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -100,14 +106,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             mActionBar.setTitle("Geo Project");
     }
 
-
-    private void setupRealm(){
-        Realm.init(this);
-        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder()
-                .name("geoprojectdb.realm").build();
-        mRealm = Realm.getInstance(realmConfiguration);
-    }
-
     private void setupConnection() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this /* FragmentActivity */,
@@ -118,18 +116,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .addApi(Places.PLACE_DETECTION_API)
                 .build();
         mGoogleApiClient.connect();
-    }
-
-    public void setupRecyclerView() {
-        ArrayList<String> arrayList = new ArrayList<>();
-        for (int i = 1; i <= 10; i++)
-            arrayList.add(i + " Number of address");
-
-        RecyclerView mRecyclerView = findViewById(R.id.recycler_view);
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        AddressesRecyclerAdapter mAdapter = new AddressesRecyclerAdapter(arrayList);
-        mRecyclerView.setAdapter(mAdapter);
     }
 
     public void checkForLocationPermissions() {
@@ -193,6 +179,48 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    public void onSaveLastKnownLocation(View view){
+        if (mLastKnownLocation != null)
+            mPresenter.onSaveAddress(mLastKnownLocation);
+        else
+            showToast("No location detected");
+    }
+
+    @Override
+    public void onAddressesList(RealmResults<AddressModel> realmResults) {
+        RecyclerView recyclerView = findViewById(R.id.recycler_view);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mAdapter = new AddressesRecyclerAdapter(realmResults);
+        if (realmResults.isEmpty())
+            showToast("No addresses in the database");
+        else {
+            recyclerView.setAdapter(mAdapter);
+        }
+    }
+
+    @Override
+    public void onAddedAddressSuccess(String message) {
+        mAdapter.notifyDataSetChanged();
+        showToast(message);
+    }
+
+    @Override
+    public void onAddAddressError(String message) {
+        showToast(message);
+    }
+
+    @Override
+    public void onDeleteAddressesSuccess(String message) {
+        mAdapter.notifyDataSetChanged();
+        showToast(message);
+    }
+
+    @Override
+    public void onDeleteAddressesError(String message) {
+        showToast(message);
+    }
+
     @Override
     public void onConnectionSuspended(int i) {
         showToast("Connection was suspended");
@@ -200,7 +228,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        showToast("There was a problem in the connection");
+        showToast("Google Maps Failed");
     }
 
     private void showToast(String message) {
@@ -209,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     protected void onDestroy() {
-        mRealm.close();
+        mPresenter.onDestroy();
         super.onDestroy();
     }
 }

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="baltamon.mx.geoproject.MainActivity">
+    tools:context="baltamon.mx.geoproject.main_activity.MainActivity">
 
     <com.sothree.slidinguppanel.SlidingUpPanelLayout
         android:layout_width="match_parent"
@@ -28,7 +28,8 @@
             <Button
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/button_add_address" />
+                android:text="@string/button_add_address"
+                android:onClick="onSaveLastKnownLocation"/>
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/recycler_view"
