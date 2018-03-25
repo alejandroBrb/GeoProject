@@ -1,13 +1,15 @@
 package baltamon.mx.geoproject.models;
 
-import io.realm.MutableRealmInteger;
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import io.realm.RealmObject;
 
 /**
  * Created by Baltazar Rodriguez on 24/03/2018.
  */
 
-public class AddressModel extends RealmObject {
+public class AddressModel extends RealmObject implements Parcelable {
     private int addressID;
     private String addressKnownName;
     private String addressStreet;
@@ -17,6 +19,32 @@ public class AddressModel extends RealmObject {
     private String addressPostalCode;
     private double addressLatitude;
     private double addressLongitude;
+
+    protected AddressModel(Parcel in) {
+        addressID = in.readInt();
+        addressKnownName = in.readString();
+        addressStreet = in.readString();
+        addressCity = in.readString();
+        addressState = in.readString();
+        addressCountry = in.readString();
+        addressPostalCode = in.readString();
+        addressLatitude = in.readDouble();
+        addressLongitude = in.readDouble();
+    }
+
+    public AddressModel(){}
+
+    public static final Creator<AddressModel> CREATOR = new Creator<AddressModel>() {
+        @Override
+        public AddressModel createFromParcel(Parcel in) {
+            return new AddressModel(in);
+        }
+
+        @Override
+        public AddressModel[] newArray(int size) {
+            return new AddressModel[size];
+        }
+    };
 
     public int getAddressID() {
         return addressID;
@@ -88,5 +116,23 @@ public class AddressModel extends RealmObject {
 
     public void setAddressLongitude(double addressLongitude) {
         this.addressLongitude = addressLongitude;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeInt(addressID);
+        parcel.writeString(addressKnownName);
+        parcel.writeString(addressStreet);
+        parcel.writeString(addressCity);
+        parcel.writeString(addressState);
+        parcel.writeString(addressCountry);
+        parcel.writeString(addressPostalCode);
+        parcel.writeDouble(addressLatitude);
+        parcel.writeDouble(addressLongitude);
     }
 }
