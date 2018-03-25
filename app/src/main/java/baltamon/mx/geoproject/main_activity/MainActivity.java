@@ -29,6 +29,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
 
@@ -45,13 +46,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private AddressesRecyclerAdapter mAdapter;
 
+    private SlidingUpPanelLayout mSlidePanel;
+
     private GoogleMap mGoogleMap;
     private GoogleApiClient mGoogleApiClient;
     private boolean mLocationPermissionGranted;
     private Location mLastKnownLocation;
     private CameraPosition mCameraPosition;
     private static final float CAMERA_ZOOM = 13;
-
     private static final int LOCATION_PERMISSION = 100;
 
     @Override
@@ -63,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         setupToolbar();
         setupConnection();
+        mSlidePanel = findViewById(R.id.slideup_panel);
     }
 
     @Override
@@ -239,5 +242,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onDestroy() {
         mPresenter.onDestroy();
         super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mSlidePanel.isOverlayed())
+            mSlidePanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        else
+            super.onBackPressed();
     }
 }
