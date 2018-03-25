@@ -1,4 +1,4 @@
-package baltamon.mx.geoproject;
+package baltamon.mx.geoproject.main_activity;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -16,6 +16,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -28,35 +29,41 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
-import java.util.ArrayList;
-
-import io.realm.Realm;
-import io.realm.RealmConfiguration;
+import baltamon.mx.geoproject.adapters.AddressesRecyclerAdapter;
+import baltamon.mx.geoproject.R;
+import baltamon.mx.geoproject.models.AddressModel;
+import io.realm.RealmResults;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
-        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
+        MainActivityView {
+
+    private MainActivityPresenter mPresenter;
+
+    private AddressesRecyclerAdapter mAdapter;
+
+    private SlidingUpPanelLayout mSlidePanel;
 
     private GoogleMap mGoogleMap;
     private GoogleApiClient mGoogleApiClient;
     private boolean mLocationPermissionGranted;
     private Location mLastKnownLocation;
-    private CameraPosition mCameraPosition;
     private static final float CAMERA_ZOOM = 13;
-
     private static final int LOCATION_PERMISSION = 100;
-
-    private Realm mRealm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setupRealm();
+        mPresenter = new MainActivityPresenter(this);
+        mPresenter.onCreate();
 
         setupToolbar();
         setupConnection();
-        setupRecyclerView();
+        mSlidePanel = findViewById(R.id.slideup_panel);
     }
 
     @Override
@@ -74,6 +81,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if (mLocationPermissionGranted)
             updateLocationUI();
+
+        mGoogleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                mGoogleMap.clear();
+            }
+        });
     }
 
     @Override
@@ -86,12 +100,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.tb_empty_list:
-                Toast.makeText(this, "Empty list", Toast.LENGTH_SHORT).show();
+                mPresenter.cleanAddressesList();
+                mGoogleMap.clear();
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Initialize the Toolbar settings
+     */
     public void setupToolbar() {
         Toolbar mToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
@@ -100,14 +118,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             mActionBar.setTitle("Geo Project");
     }
 
-
-    private void setupRealm(){
-        Realm.init(this);
-        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder()
-                .name("geoprojectdb.realm").build();
-        mRealm = Realm.getInstance(realmConfiguration);
-    }
-
+    /**
+     * Initialize the GoogleClient Connection
+     */
     private void setupConnection() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this /* FragmentActivity */,
@@ -120,18 +133,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mGoogleApiClient.connect();
     }
 
-    public void setupRecyclerView() {
-        ArrayList<String> arrayList = new ArrayList<>();
-        for (int i = 1; i <= 10; i++)
-            arrayList.add(i + " Number of address");
-
-        RecyclerView mRecyclerView = findViewById(R.id.recycler_view);
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        AddressesRecyclerAdapter mAdapter = new AddressesRecyclerAdapter(arrayList);
-        mRecyclerView.setAdapter(mAdapter);
-    }
-
+    /**
+     * Check if the app has permissions to get the last know devise location
+     */
     public void checkForLocationPermissions() {
         if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
@@ -154,6 +158,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         updateLocationUI();
     }
 
+    /**
+     * Enable the option to show the current location of the device in the map
+     */
     private void updateLocationUI() {
         if (mGoogleMap == null)
             return;
@@ -171,26 +178,87 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    /**
+     * Get device known last location
+     */
     private void getDeviceLocation() {
         try {
             mLastKnownLocation = LocationServices.FusedLocationApi.
                     getLastLocation(mGoogleApiClient);
-            updateCameraPosition();
+            if (mLastKnownLocation != null) {
+                updateCameraPosition(new LatLng(mLastKnownLocation.getLatitude(),
+                        mLastKnownLocation.getLongitude()));
+            } else {
+                Log.d("Location Error", "Current location is null. Using defaults.");
+                mGoogleMap.getUiSettings().setMyLocationButtonEnabled(false);
+            }
         } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage());
         }
     }
 
-    private void updateCameraPosition() {
-        if (mLastKnownLocation != null) {
-            mCameraPosition = new CameraPosition(
-                    new LatLng(mLastKnownLocation.getLatitude(),
-                            mLastKnownLocation.getLongitude()), CAMERA_ZOOM, 0, 0);
-            mGoogleMap.moveCamera(CameraUpdateFactory.newCameraPosition(mCameraPosition));
-        } else {
-            Log.d("Location Error", "Current location is null. Using defaults.");
-            mGoogleMap.getUiSettings().setMyLocationButtonEnabled(false);
-        }
+    /**
+     * Update in the map the camera position
+     */
+    private void updateCameraPosition(LatLng latLng) {
+        CameraPosition cameraPosition = new CameraPosition(latLng, CAMERA_ZOOM, 0, 0);
+        mGoogleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+    }
+
+    /**
+     * It add in the database the last know location
+     */
+    public void onSaveLastKnownLocation(View view){
+        if (mLastKnownLocation != null)
+            mPresenter.onSaveAddress(mLastKnownLocation);
+        else
+            showToast("No location detected");
+    }
+
+    @Override
+    public void onAddressesList(RealmResults<AddressModel> realmResults) {
+        RecyclerView recyclerView = findViewById(R.id.recycler_view);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mAdapter = new AddressesRecyclerAdapter(this, realmResults, getSupportFragmentManager());
+
+        if (realmResults.isEmpty())
+            showToast("No addresses in the database");
+
+        recyclerView.setAdapter(mAdapter);
+    }
+
+    @Override
+    public void onAddedAddressSuccess(String message) {
+        mAdapter.notifyDataSetChanged();
+        showToast(message);
+    }
+
+    @Override
+    public void onAddAddressError(String message) {
+        showToast(message);
+    }
+
+    @Override
+    public void onDeleteAddressesSuccess(String message) {
+        mAdapter.notifyDataSetChanged();
+        showToast(message);
+    }
+
+    @Override
+    public void onDeleteAddressesError(String message) {
+        showToast(message);
+    }
+
+    @Override
+    public void onAddressSelected(AddressModel address) {
+        hideSlideUpPanel();
+        mGoogleMap.clear();
+        LatLng markerPosition = new LatLng(address.getAddressLatitude(),
+                address.getAddressLongitude());
+        mGoogleMap.addMarker(new MarkerOptions().position(markerPosition)).
+                setTitle(address.getAddressStreet());
+        updateCameraPosition(markerPosition);
     }
 
     @Override
@@ -200,7 +268,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        showToast("There was a problem in the connection");
+        showToast("Google Maps Failed");
     }
 
     private void showToast(String message) {
@@ -209,7 +277,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     protected void onDestroy() {
-        mRealm.close();
+        mPresenter.onDestroy();
         super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mSlidePanel.isOverlayed())
+            hideSlideUpPanel();
+        else
+            super.onBackPressed();
+    }
+
+    private void hideSlideUpPanel(){
+        mSlidePanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
     }
 }

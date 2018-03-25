@@ -1,9 +1,11 @@
-package baltamon.mx.geoproject;
+package baltamon.mx.geoproject.view_holders;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
+
+import baltamon.mx.geoproject.R;
 
 /**
  * Created by Baltazar Rodriguez on 22/03/2018.
