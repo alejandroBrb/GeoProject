@@ -192,11 +192,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         mAdapter = new AddressesRecyclerAdapter(realmResults, getSupportFragmentManager());
+
         if (realmResults.isEmpty())
             showToast("No addresses in the database");
-        else {
-            recyclerView.setAdapter(mAdapter);
-        }
+
+        recyclerView.setAdapter(mAdapter);
     }
 
     @Override
