@@ -16,4 +16,5 @@ public interface MainActivityView {
     void onAddressesList(RealmResults<AddressModel> realmResults);
     void onDeleteAddressesSuccess(String message);
     void onDeleteAddressesError(String message);
+    void onAddressSelected(AddressModel address);
 }
