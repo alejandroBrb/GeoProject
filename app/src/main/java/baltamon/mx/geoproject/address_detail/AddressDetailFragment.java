@@ -33,7 +33,7 @@ public class AddressDetailFragment extends DialogFragment implements AddressDeta
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mPresenter = new AddressDetailFragmentPresenter((AddressModel)
+        mPresenter = new AddressDetailFragmentPresenter(
                 getArguments().getParcelable(OBJECT_KEY), this);
         mPresenter.onCreate();
     }
@@ -58,11 +58,6 @@ public class AddressDetailFragment extends DialogFragment implements AddressDeta
         holder.tvAddressName.setText(address.getAddressStreet());
         holder.tvAddressLatitude.setText("Lat. " + String.valueOf(address.getAddressLatitude()));
         holder.tvAddressLongitude.setText("Lng. " + String.valueOf(address.getAddressLongitude()));
-        holder.btnClose.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dismiss();
-            }
-        });
+        holder.btnClose.setOnClickListener(view1 -> dismiss());
     }
 }
