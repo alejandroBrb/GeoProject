@@ -21,6 +21,10 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -54,6 +58,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final float CAMERA_ZOOM = 13;
     private static final int LOCATION_PERMISSION = 100;
 
+    private LocationRequest mLocationRequest;
+    private FusedLocationProviderClient mLocationClient;
+    private LocationCallback mLocationCallback;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setupToolbar();
         setupConnection();
         mSlidePanel = findViewById(R.id.slideup_panel);
+
     }
 
     @Override
@@ -79,15 +88,41 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         checkForLocationPermissions();
 
-        if (mLocationPermissionGranted)
+        if (mLocationPermissionGranted) {
+            startLocationUpdates();
             updateLocationUI();
+        }
 
-        mGoogleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+        mGoogleMap.setOnMapClickListener(latLng -> mGoogleMap.clear());
+
+    }
+
+    private void startLocationUpdates() {
+        mLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        mLocationRequest = LocationRequest.create();
+        mLocationRequest.setInterval(10000);
+        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        mLocationCallback = new LocationCallback() {
             @Override
-            public void onMapClick(LatLng latLng) {
-                mGoogleMap.clear();
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null)
+                    return;
+                else
+                    showToast("Location changed");
             }
-        });
+        };
+
+        try {
+            mLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
+        } catch (SecurityException e) {
+            Log.e("Exception: %s", e.getMessage());
+        }
+    }
+
+    private void stopLocationUpdates(){
+        mLocationClient.removeLocationUpdates(mLocationCallback);
     }
 
     @Override
@@ -183,15 +218,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      */
     private void getDeviceLocation() {
         try {
-            mLastKnownLocation = LocationServices.FusedLocationApi.
-                    getLastLocation(mGoogleApiClient);
-            if (mLastKnownLocation != null) {
-                updateCameraPosition(new LatLng(mLastKnownLocation.getLatitude(),
-                        mLastKnownLocation.getLongitude()));
-            } else {
-                Log.d("Location Error", "Current location is null. Using defaults.");
-                mGoogleMap.getUiSettings().setMyLocationButtonEnabled(false);
-            }
+            mLocationClient.getLastLocation().addOnSuccessListener(this, location -> {
+                if (location != null) {
+                    mLastKnownLocation = location;
+                    updateCameraPosition(new LatLng(mLastKnownLocation.getLatitude(),
+                            mLastKnownLocation.getLongitude()));
+                } else {
+                    Log.d("Location Error", "Current location is null. Using defaults.");
+                    showToast("Location not available");
+                    mGoogleMap.getUiSettings().setMyLocationButtonEnabled(false);
+                }
+            });
         } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage());
         }
@@ -208,7 +245,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     /**
      * It add in the database the last know location
      */
-    public void onSaveLastKnownLocation(View view){
+    public void onSaveLastKnownLocation(View view) {
         if (mLastKnownLocation != null)
             mPresenter.onSaveAddress(mLastKnownLocation);
         else
@@ -278,6 +315,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onDestroy() {
         mPresenter.onDestroy();
+        stopLocationUpdates();
         super.onDestroy();
     }
 
@@ -289,7 +327,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             super.onBackPressed();
     }
 
-    private void hideSlideUpPanel(){
+    private void hideSlideUpPanel() {
         mSlidePanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
     }
 }

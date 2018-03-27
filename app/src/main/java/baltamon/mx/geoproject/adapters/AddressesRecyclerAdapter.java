@@ -44,20 +44,13 @@ public class AddressesRecyclerAdapter extends RecyclerView.Adapter<AddressItemVi
     @Override
     public void onBindViewHolder(AddressItemViewHolder holder, final int position) {
         holder.tvAddressName.setText(mRealmResults.get(position).getAddressStreet());
-        holder.btnDetail.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                AddressDetailFragment dialog = new AddressDetailFragment().
-                        newInstance(mRealmResults.get(position));
-                dialog.show(mFragmentManager, "Detail");
-            }
+        holder.btnDetail.setOnClickListener(view -> {
+            AddressDetailFragment dialog = new AddressDetailFragment().
+                    newInstance(mRealmResults.get(position));
+            dialog.show(mFragmentManager, "Detail");
         });
-        holder.btnPlace.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mView.onAddressSelected(mRealmResults.get(position));
-            }
-        });
+        holder.btnPlace.setOnClickListener(view ->
+                mView.onAddressSelected(mRealmResults.get(position)));
     }
 
     @Override
