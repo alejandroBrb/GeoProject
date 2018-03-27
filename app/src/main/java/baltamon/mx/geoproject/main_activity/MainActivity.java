@@ -23,7 +23,6 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
@@ -44,7 +43,7 @@ import io.realm.RealmResults;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
-        MainActivityView, LocationListener {
+        MainActivityView {
 
     private MainActivityPresenter mPresenter;
 
@@ -73,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setupToolbar();
         setupConnection();
         mSlidePanel = findViewById(R.id.slideup_panel);
+
     }
 
     @Override
@@ -109,10 +109,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onLocationResult(LocationResult locationResult) {
                 if (locationResult == null)
                     return;
-                else {
+                else
                     showToast("Location changed");
-                    mLastKnownLocation = locationResult.getLastLocation();
-                }
             }
         };
 
@@ -227,6 +225,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             mLastKnownLocation.getLongitude()));
                 } else {
                     Log.d("Location Error", "Current location is null. Using defaults.");
+                    showToast("Location not available");
                     mGoogleMap.getUiSettings().setMyLocationButtonEnabled(false);
                 }
             });
@@ -330,10 +329,5 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void hideSlideUpPanel() {
         mSlidePanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        showToast("Location changed");
     }
 }
