@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-import baltamon.mx.geoproject.Presenter;
+import baltamon.mx.geoproject.utilities.Presenter;
 import baltamon.mx.geoproject.models.AddressModel;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -37,22 +37,9 @@ public class MainActivityPresenter implements Presenter {
     }
 
     public void cleanAddressesList(){
-        mRealm.executeTransactionAsync(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                realm.deleteAll();
-            }
-        }, new Realm.Transaction.OnSuccess() {
-            @Override
-            public void onSuccess() {
-                mView.onDeleteAddressesSuccess("List is clean");
-            }
-        }, new Realm.Transaction.OnError() {
-            @Override
-            public void onError(Throwable error) {
-                mView.onDeleteAddressesError(error.toString());
-            }
-        });
+        mRealm.executeTransactionAsync(realm -> realm.deleteAll(),
+                () -> mView.onDeleteAddressesSuccess("List is clean"),
+                error -> mView.onDeleteAddressesError(error.toString()));
     }
 
     private void getAddressesList(){
@@ -64,22 +51,10 @@ public class MainActivityPresenter implements Presenter {
         final AddressModel address = getAddress(location);
         address.setAddressID(getAddressID());
 
-        mRealm.executeTransactionAsync(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                AddressModel addressModel = realm.copyToRealm(address);
-            }
-        }, new Realm.Transaction.OnSuccess() {
-            @Override
-            public void onSuccess() {
-                mView.onAddedAddressSuccess("Address Saved");
-            }
-        }, new Realm.Transaction.OnError() {
-            @Override
-            public void onError(Throwable error) {
-                mView.onAddAddressError(error.toString());
-            }
-        });
+        mRealm.executeTransactionAsync(realm ->
+                realm.copyToRealm(address),
+                () -> mView.onAddedAddressSuccess("Address Saved"),
+                error -> mView.onAddAddressError(error.toString()));
     }
 
     private int getAddressID(){

@@ -1,9 +1,8 @@
 package baltamon.mx.geoproject.address_detail;
 
-import android.content.Context;
 import android.view.View;
 
-import baltamon.mx.geoproject.Presenter;
+import baltamon.mx.geoproject.utilities.Presenter;
 import baltamon.mx.geoproject.models.AddressModel;
 
 /**

@@ -16,15 +16,11 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -36,6 +32,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
+import baltamon.mx.geoproject.utilities.SwipeButton;
+import baltamon.mx.geoproject.utilities.SwipeButtonCustomItems;
 import baltamon.mx.geoproject.adapters.AddressesRecyclerAdapter;
 import baltamon.mx.geoproject.R;
 import baltamon.mx.geoproject.models.AddressModel;
@@ -58,9 +56,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final float CAMERA_ZOOM = 13;
     private static final int LOCATION_PERMISSION = 100;
 
-    private LocationRequest mLocationRequest;
     private FusedLocationProviderClient mLocationClient;
-    private LocationCallback mLocationCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setupToolbar();
         setupConnection();
         mSlidePanel = findViewById(R.id.slideup_panel);
-
+        setupSwipeButton();
     }
 
     @Override
@@ -87,42 +83,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mGoogleMap = googleMap;
 
         checkForLocationPermissions();
-
         if (mLocationPermissionGranted) {
-            startLocationUpdates();
             updateLocationUI();
         }
-
         mGoogleMap.setOnMapClickListener(latLng -> mGoogleMap.clear());
-
-    }
-
-    private void startLocationUpdates() {
-        mLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        mLocationRequest = LocationRequest.create();
-        mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(5000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-        mLocationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                if (locationResult == null)
-                    return;
-                else
-                    showToast("Location changed");
-            }
-        };
-
-        try {
-            mLocationClient.requestLocationUpdates(mLocationRequest, mLocationCallback, null);
-        } catch (SecurityException e) {
-            Log.e("Exception: %s", e.getMessage());
-        }
-    }
-
-    private void stopLocationUpdates(){
-        mLocationClient.removeLocationUpdates(mLocationCallback);
     }
 
     @Override
@@ -140,6 +104,29 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Initializing swipe button
+     */
+    public void setupSwipeButton() {
+        SwipeButton swipeButton = findViewById(R.id.my_swipe_button);
+        SwipeButtonCustomItems swipeButtonSettings = new SwipeButtonCustomItems() {
+            @Override
+            public void onSwipeConfirm() {
+                onSaveLastKnownLocation();
+            }
+        };
+        swipeButtonSettings
+                .setButtonPressText("Saving location")
+                .setGradientColor1(0xFF888888)
+                .setGradientColor2(0xFF666666)
+                .setGradientColor2Width(60)
+                .setGradientColor3(0xFF333333)
+                .setPostConfirmationColor(0xFF888888)
+                .setActionConfirmDistanceFraction(0.7)
+                .setActionConfirmText("Swipe to save");
+        swipeButton.setSwipeButtonCustomItems(swipeButtonSettings);
     }
 
     /**
@@ -201,6 +188,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             return;
         try {
             if (mLocationPermissionGranted) {
+                if (mLocationClient == null)
+                    mLocationClient = LocationServices.getFusedLocationProviderClient(this);
                 mGoogleMap.setMyLocationEnabled(true);
                 mGoogleMap.getUiSettings().setMyLocationButtonEnabled(true);
                 getDeviceLocation();
@@ -214,7 +203,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     /**
-     * Get device known last location
+     * Get device known last location in mLastKnownLocation
      */
     private void getDeviceLocation() {
         try {
@@ -245,7 +234,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     /**
      * It add in the database the last know location
      */
-    public void onSaveLastKnownLocation(View view) {
+    public void onSaveLastKnownLocation() {
+        if (mLocationPermissionGranted) getDeviceLocation();
         if (mLastKnownLocation != null)
             mPresenter.onSaveAddress(mLastKnownLocation);
         else
@@ -315,7 +305,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onDestroy() {
         mPresenter.onDestroy();
-        stopLocationUpdates();
         super.onDestroy();
     }
 

@@ -1,4 +1,4 @@
-package baltamon.mx.geoproject;
+package baltamon.mx.geoproject.utilities;
 
 /**
  * Created by Baltazar Rodriguez on 24/03/2018.
