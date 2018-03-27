@@ -43,7 +43,7 @@ public class AddressesRecyclerAdapter extends RecyclerView.Adapter<AddressItemVi
 
     @Override
     public void onBindViewHolder(AddressItemViewHolder holder, final int position) {
-        holder.tvAddressName.setText(mRealmResults.get(position).getAddressStreet());
+        holder.tvAddressName.setText(getAddressName(mRealmResults.get(position)));
         holder.btnDetail.setOnClickListener(view -> {
             AddressDetailFragment dialog = new AddressDetailFragment().
                     newInstance(mRealmResults.get(position));
@@ -51,6 +51,13 @@ public class AddressesRecyclerAdapter extends RecyclerView.Adapter<AddressItemVi
         });
         holder.btnPlace.setOnClickListener(view ->
                 mView.onAddressSelected(mRealmResults.get(position)));
+    }
+
+    private String getAddressName(AddressModel model){
+        if (model.getAddressStreet() == null)
+            return "No address name";
+        else
+            return model.getAddressStreet();
     }
 
     @Override

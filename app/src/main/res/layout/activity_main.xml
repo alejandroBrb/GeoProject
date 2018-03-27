@@ -26,11 +26,13 @@
             android:background="@color/colorGrey800"
             android:orientation="vertical">
 
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:onClick="onSaveLastKnownLocation"
-                android:text="@string/button_add_address" />
+            <baltamon.mx.geoproject.utilities.SwipeButton
+                android:id="@+id/my_swipe_button"
+                android:layout_width="400dp"
+                android:layout_height="50dp"
+                android:background="#888888"
+                android:text="Swipe to save"
+                android:textColor="#ffffff" />
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/recycler_view"
