@@ -7,8 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.util.ArrayList;
-
 import baltamon.mx.geoproject.address_detail.AddressDetailFragment;
 import baltamon.mx.geoproject.main_activity.MainActivityView;
 import baltamon.mx.geoproject.models.AddressModel;
@@ -53,11 +51,11 @@ public class AddressesRecyclerAdapter extends RecyclerView.Adapter<AddressItemVi
                 mView.onAddressSelected(mRealmResults.get(position)));
     }
 
-    private String getAddressName(AddressModel model){
-        if (model.getAddressStreet() == null)
+    private String getAddressName(AddressModel address){
+        if (address.getStreet() == null)
             return "No address name";
         else
-            return model.getAddressStreet();
+            return address.getStreet();
     }
 
     @Override

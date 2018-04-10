@@ -9,8 +9,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
-import baltamon.mx.geoproject.utilities.Presenter;
 import baltamon.mx.geoproject.models.AddressModel;
+import baltamon.mx.geoproject.utilities.Presenter;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmResults;
@@ -29,6 +29,7 @@ public class MainActivityPresenter implements Presenter {
     public void onCreate() {
         Realm.init(mContext);
         RealmConfiguration realmConfiguration = new RealmConfiguration.Builder()
+                .deleteRealmIfMigrationNeeded()
                 .name("geoprojectdb.realm").build();
         mRealm = Realm.getInstance(realmConfiguration);
         mView = (MainActivityView) mContext;
@@ -49,7 +50,7 @@ public class MainActivityPresenter implements Presenter {
 
     public void onSaveAddress(Location location){
         final AddressModel address = getAddress(location);
-        address.setAddressID(getAddressID());
+        address.setId(getAddressID());
 
         mRealm.executeTransactionAsync(realm ->
                 realm.copyToRealm(address),
@@ -67,19 +68,19 @@ public class MainActivityPresenter implements Presenter {
 
     private AddressModel getAddress(Location location){
         AddressModel address = new AddressModel();
-        address.setAddressLatitude(location.getLatitude());
-        address.setAddressLongitude(location.getLongitude());
+        address.setLatitude(location.getLatitude());
+        address.setLongitude(location.getLongitude());
         Geocoder geocoder = new Geocoder(mContext, Locale.getDefault());
         try {
             List<Address> addresses = geocoder.getFromLocation(location.getLatitude(),
                     location.getLongitude(), 1);
             if (!addresses.isEmpty()){
-                address.setAddressStreet(addresses.get(0).getAddressLine(0));
-                address.setAddressCity(addresses.get(0).getLocality());
-                address.setAddressState(addresses.get(0).getAdminArea());
-                address.setAddressCountry(addresses.get(0).getCountryName());
-                address.setAddressPostalCode(addresses.get(0).getPostalCode());
-                address.setAddressKnownName(addresses.get(0).getFeatureName());
+                address.setStreet(addresses.get(0).getAddressLine(0));
+                address.setCity(addresses.get(0).getLocality());
+                address.setState(addresses.get(0).getAdminArea());
+                address.setCountry(addresses.get(0).getCountryName());
+                address.setPostalCode(addresses.get(0).getPostalCode());
+                address.setKnownName(addresses.get(0).getFeatureName());
             }
         } catch (IOException e) {
             e.printStackTrace();

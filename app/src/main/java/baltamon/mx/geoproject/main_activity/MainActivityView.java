@@ -1,8 +1,6 @@
 package baltamon.mx.geoproject.main_activity;
 
 
-import java.util.ArrayList;
-
 import baltamon.mx.geoproject.models.AddressModel;
 import io.realm.RealmResults;
 

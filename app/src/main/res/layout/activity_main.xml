@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="baltamon.mx.geoproject.main_activity.MainActivity">
+    tools:context="baltamon.mx.geoproject.main_activity.MainActivityKt">
 
     <com.sothree.slidinguppanel.SlidingUpPanelLayout
         android:id="@+id/slideup_panel"
