@@ -10,7 +10,7 @@ import baltamon.mx.geoproject.R;
 /**
  * Created by Baltazar Rodriguez on 22/03/2018.
  */
-
+@Deprecated
 public class AddressItemViewHolder extends RecyclerView.ViewHolder {
     public TextView tvAddressName;
     public ImageButton btnPlace;

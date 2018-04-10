@@ -7,17 +7,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import baltamon.mx.geoproject.address_detail.AddressDetailFragment;
+import baltamon.mx.geoproject.R;
+import baltamon.mx.geoproject.address_detail.AddressDetailFragmentKt;
 import baltamon.mx.geoproject.main_activity.MainActivityView;
 import baltamon.mx.geoproject.models.AddressModel;
 import baltamon.mx.geoproject.view_holders.AddressItemViewHolder;
-import baltamon.mx.geoproject.R;
 import io.realm.RealmResults;
 
 /**
  * Created by Baltazar Rodriguez on 22/03/2018.
  */
-
+@Deprecated
 public class AddressesRecyclerAdapter extends RecyclerView.Adapter<AddressItemViewHolder> {
 
     private RealmResults<AddressModel> mRealmResults;
@@ -43,8 +43,7 @@ public class AddressesRecyclerAdapter extends RecyclerView.Adapter<AddressItemVi
     public void onBindViewHolder(AddressItemViewHolder holder, final int position) {
         holder.tvAddressName.setText(getAddressName(mRealmResults.get(position)));
         holder.btnDetail.setOnClickListener(view -> {
-            AddressDetailFragment dialog = new AddressDetailFragment().
-                    newInstance(mRealmResults.get(position));
+            AddressDetailFragmentKt dialog = new AddressDetailFragmentKt().newInstance(mRealmResults.get(position));
             dialog.show(mFragmentManager, "Detail");
         });
         holder.btnPlace.setOnClickListener(view ->

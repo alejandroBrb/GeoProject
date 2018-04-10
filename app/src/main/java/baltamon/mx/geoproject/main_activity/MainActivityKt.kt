@@ -15,7 +15,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import baltamon.mx.geoproject.R
-import baltamon.mx.geoproject.adapters.AddressesRecyclerAdapter
+import baltamon.mx.geoproject.adapters.AddressAdapter
 import baltamon.mx.geoproject.models.AddressModel
 import baltamon.mx.geoproject.utilities.SwipeButton
 import baltamon.mx.geoproject.utilities.SwipeButtonCustomItems
@@ -44,7 +44,7 @@ class MainActivityKt : AppCompatActivity(),
         MainActivityView {
 
     private var mPresenter: MainActivityPresenterKt? = null
-    private var mAdapter: AddressesRecyclerAdapter? = null
+    private var mAdapter: AddressAdapter? = null
     private var mSlidePanel: SlidingUpPanelLayout? = null
     private var mGoogleMap: GoogleMap? = null
     private var mGoogleApiClient: GoogleApiClient? = null
@@ -201,6 +201,7 @@ class MainActivityKt : AppCompatActivity(),
         try {
             mLocationClient?.lastLocation?.addOnSuccessListener(this) {
                 if (it != null) {
+                    mLastKnownLocation = it
                     updateCameraPosition(LatLng(it.latitude, it.longitude))
                 } else {
                     Log.d("Location Error", "Current location is null. Using defaults.")
@@ -239,7 +240,7 @@ class MainActivityKt : AppCompatActivity(),
         val recyclerView = findViewById<RecyclerView>(R.id.recycler_view)
         recyclerView.setHasFixedSize(true)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        mAdapter = AddressesRecyclerAdapter(this, realmResults, supportFragmentManager)
+        mAdapter = AddressAdapter(this, realmResults, supportFragmentManager)
 
         if (realmResults.isEmpty())
             showToast("No addresses in the database")

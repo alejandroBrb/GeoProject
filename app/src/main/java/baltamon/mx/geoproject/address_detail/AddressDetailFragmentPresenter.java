@@ -8,7 +8,7 @@ import baltamon.mx.geoproject.utilities.Presenter;
 /**
  * Created by Baltazar Rodriguez on 24/03/2018.
  */
-
+@Deprecated
 public class AddressDetailFragmentPresenter implements Presenter {
 
     private AddressModel mAddress;

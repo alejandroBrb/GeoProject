@@ -18,7 +18,7 @@ import io.realm.RealmResults;
 /**
  * Created by Baltazar Rodriguez on 24/03/2018.
  */
-
+@Deprecated
 public class MainActivityPresenter implements Presenter {
 
     private Context mContext;

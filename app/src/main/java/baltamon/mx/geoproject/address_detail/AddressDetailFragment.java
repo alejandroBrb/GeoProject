@@ -14,8 +14,8 @@ import baltamon.mx.geoproject.view_holders.AddressDetailFragmentViewHolder;
 /**
  * Created by Baltazar Rodriguez on 24/03/2018.
  */
-
-public class AddressDetailFragment extends DialogFragment implements AddressDetailFragmentView{
+@Deprecated
+public class AddressDetailFragment extends DialogFragment implements AddressDetailFragmentView {
 
     private AddressDetailFragmentPresenter mPresenter;
 

@@ -9,7 +9,7 @@ import baltamon.mx.geoproject.R;
 /**
  * Created by Baltazar Rodriguez on 24/03/2018.
  */
-
+@Deprecated
 public class AddressDetailFragmentViewHolder {
     public TextView tvAddressName;
     public TextView tvAddressLatitude;

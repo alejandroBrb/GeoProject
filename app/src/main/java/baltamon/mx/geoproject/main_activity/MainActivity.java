@@ -39,6 +39,7 @@ import baltamon.mx.geoproject.utilities.SwipeButton;
 import baltamon.mx.geoproject.utilities.SwipeButtonCustomItems;
 import io.realm.RealmResults;
 
+@Deprecated
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         MainActivityView {
