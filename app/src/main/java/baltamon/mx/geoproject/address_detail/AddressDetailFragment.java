@@ -14,8 +14,8 @@ import baltamon.mx.geoproject.view_holders.AddressDetailFragmentViewHolder;
 /**
  * Created by Baltazar Rodriguez on 24/03/2018.
  */
-
-public class AddressDetailFragment extends DialogFragment implements AddressDetailFragmentView{
+@Deprecated
+public class AddressDetailFragment extends DialogFragment implements AddressDetailFragmentView {
 
     private AddressDetailFragmentPresenter mPresenter;
 
@@ -55,9 +55,9 @@ public class AddressDetailFragment extends DialogFragment implements AddressDeta
     @Override
     public void onShowAddressDetails(AddressModel address, View view) {
         AddressDetailFragmentViewHolder holder = new AddressDetailFragmentViewHolder(view);
-        holder.tvAddressName.setText(address.getAddressStreet());
-        holder.tvAddressLatitude.setText("Lat. " + String.valueOf(address.getAddressLatitude()));
-        holder.tvAddressLongitude.setText("Lng. " + String.valueOf(address.getAddressLongitude()));
+        holder.tvAddressName.setText(address.getStreet());
+        holder.tvAddressLatitude.setText("Lat. " + String.valueOf(address.getLatitude()));
+        holder.tvAddressLongitude.setText("Lng. " + String.valueOf(address.getLongitude()));
         holder.btnClose.setOnClickListener(view1 -> dismiss());
     }
 }

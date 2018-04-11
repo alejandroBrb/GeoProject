@@ -3,13 +3,13 @@ package baltamon.mx.geoproject.main_activity;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -32,13 +32,14 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
+import baltamon.mx.geoproject.R;
+import baltamon.mx.geoproject.adapters.AddressesRecyclerAdapter;
+import baltamon.mx.geoproject.models.AddressModel;
 import baltamon.mx.geoproject.utilities.SwipeButton;
 import baltamon.mx.geoproject.utilities.SwipeButtonCustomItems;
-import baltamon.mx.geoproject.adapters.AddressesRecyclerAdapter;
-import baltamon.mx.geoproject.R;
-import baltamon.mx.geoproject.models.AddressModel;
 import io.realm.RealmResults;
 
+@Deprecated
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
         MainActivityView {
@@ -281,10 +282,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onAddressSelected(AddressModel address) {
         hideSlideUpPanel();
         mGoogleMap.clear();
-        LatLng markerPosition = new LatLng(address.getAddressLatitude(),
-                address.getAddressLongitude());
+        LatLng markerPosition = new LatLng(address.getLatitude(),
+                address.getLongitude());
         mGoogleMap.addMarker(new MarkerOptions().position(markerPosition)).
-                setTitle(address.getAddressStreet());
+                setTitle(address.getStreet());
         updateCameraPosition(markerPosition);
     }
 
