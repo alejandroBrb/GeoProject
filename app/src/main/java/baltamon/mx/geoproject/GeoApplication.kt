@@ -7,6 +7,8 @@ import android.app.Application
  */
 class GeoApplication : Application() {
 
+    lateinit var viewComponent: ViewComponent
+
     override fun onCreate() {
         super.onCreate()
         initializeDaggerComponents()
@@ -15,6 +17,10 @@ class GeoApplication : Application() {
     private fun initializeDaggerComponents() {
         val applicationComponent = DaggerApplicacionComponent.builder()
                 .applicationModule(ApplicationModule(this))
+                .build()
+
+        viewComponent = DaggerViewComponent.builder()
+                .applicacionComponent(applicationComponent)
                 .build()
     }
 
