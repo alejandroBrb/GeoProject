@@ -6,7 +6,6 @@ import android.location.Location
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
-import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
@@ -14,6 +13,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import baltamon.mx.geoproject.BaseActivity
 import baltamon.mx.geoproject.R
 import baltamon.mx.geoproject.adapters.AddressAdapter
 import baltamon.mx.geoproject.models.AddressModel
@@ -33,17 +33,17 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
 import io.realm.RealmResults
+import javax.inject.Inject
 
 /**
  * @author Alejandro Barba on 4/9/18.
  */
-class MainActivityKt : AppCompatActivity(),
+class MainActivityKt : BaseActivity(),
         OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         MainActivityView {
 
-    private var mPresenter: MainActivityPresenterKt? = null
     private var mAdapter: AddressAdapter? = null
     private var mSlidePanel: SlidingUpPanelLayout? = null
     private var mGoogleMap: GoogleMap? = null
@@ -57,16 +57,27 @@ class MainActivityKt : AppCompatActivity(),
     private val DEFAULT_LAT = 20.6737777
     private val DEFAULT_LNG = -103.4054534
 
+    @Inject
+    lateinit var mPresenter: MainActivityPresenterKt
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        mPresenter = MainActivityPresenterKt(this)
-        mPresenter?.onCreate()
+
+        initializePresenter()
 
         setupToolbar()
         setupConnection()
         mSlidePanel = findViewById(R.id.slideup_panel)
         setupSwipeButton()
+    }
+
+    fun initializePresenter() {
+        // Inject Dagger components
+        getViewComponent().inject(this)
+
+        mPresenter.init(this)
+        mPresenter.onCreate()
     }
 
     override fun onConnected(bundle: Bundle?) {
@@ -94,7 +105,7 @@ class MainActivityKt : AppCompatActivity(),
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.tb_empty_list -> {
-                mPresenter?.cleanAddressesList()
+                mPresenter.cleanAddressesList()
                 mGoogleMap?.clear()
             }
         }

@@ -6,41 +6,34 @@ import android.location.Location
 import baltamon.mx.geoproject.models.AddressModel
 import baltamon.mx.geoproject.utilities.Presenter
 import io.realm.Realm
-import io.realm.RealmConfiguration
 import java.io.IOException
 import java.util.*
+import javax.inject.Inject
 
 /**
  * @author Alejandro Barba on 4/9/18.
  */
-class MainActivityPresenterKt constructor(private val mContext: Context) : Presenter {
+class MainActivityPresenterKt @Inject constructor(
+        private val mContext: Context,
+        private val mRealm: Realm) : Presenter {
 
     private var mView: MainActivityView? = null
-    private var mRealm: Realm? = null
+
+    fun init(view: MainActivityView) {
+        mView = view
+    }
 
     override fun onCreate() {
-        Realm.init(mContext)
-
-        val realmConfiguration = RealmConfiguration
-                .Builder()
-                .deleteRealmIfMigrationNeeded()
-                .name("geoprojectdb.realm")
-                .build()
-
-        mRealm = Realm.getInstance(realmConfiguration)
-
-        mView = mContext as MainActivityView
-
         getAddressesList()
     }
 
     fun cleanAddressesList() {
-        mRealm?.executeTransactionAsync({ it.deleteAll() },
+        mRealm.executeTransactionAsync({ it.deleteAll() },
                 { mView?.onDeleteAddressesSuccess("List is clean") }) { error ->  mView?.onDeleteAddressesError(error.toString()) }
     }
 
     private fun getAddressesList() {
-        val adresses = mRealm?.where(AddressModel::class.java)?.findAll()
+        val adresses = mRealm.where(AddressModel::class.java)?.findAll()
         mView?.onAddressesList(adresses)
     }
 
@@ -48,16 +41,16 @@ class MainActivityPresenterKt constructor(private val mContext: Context) : Prese
         val address = getAddress(location)
         address.id = getAddressID()
 
-        mRealm?.executeTransactionAsync({ it.copyToRealm(address) },
+        mRealm.executeTransactionAsync({ it.copyToRealm(address) },
                 { mView?.onAddedAddressSuccess("Address Saved") }) { error -> mView!!.onAddAddressError(error.toString()) }
     }
 
     private fun getAddressID(): Int {
-        val adresses = mRealm?.where(AddressModel::class.java)?.findAll()
+        val adresses = mRealm.where(AddressModel::class.java)?.findAll()
         return if (adresses?.isEmpty() == true)
             1
         else
-            adresses?.max("addressID")?.toInt()?.plus(1) ?: 1
+            adresses?.max("id")?.toInt()?.plus(1) ?: 1
     }
 
     private fun getAddress(location: Location?): AddressModel {
@@ -93,6 +86,6 @@ class MainActivityPresenterKt constructor(private val mContext: Context) : Prese
     }
 
     override fun onDestroy() {
-        mRealm?.close()
+        mRealm.close()
     }
 }
